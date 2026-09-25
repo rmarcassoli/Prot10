@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Text, View, TextInput, TouchableOpacity, ScrollView, SafeAreaView, ActivityIndicator, Alert } from 'react-native';
 import { styles, onboardingSlides } from './theme';
 
+if (!global.__PROT10_PERSISTED_DATABASE__) {
+  global.__PROT10_PERSISTED_DATABASE__ = "[]";
+}
+
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(true);
   const [currentSlide, setCurrentSlide] = useState(0);
-  
-  // Navigation Tab State ('calculator' or 'history')
   const [activeTab, setActiveTab] = useState('calculator');
 
   const [foodName, setFoodName] = useState('');
@@ -19,8 +21,28 @@ export default function App() {
   const [history, setHistory] = useState([]);
 
   useEffect(() => {
-    setIsLoading(false);
+    loadStoredData();
   }, []);
+
+  useEffect(() => {
+    if (!isLoading && history.length >= 0) {
+      global.__PROT10_PERSISTED_DATABASE__ = JSON.stringify(history);
+    }
+  }, [history, isLoading]);
+
+  const loadStoredData = () => {
+    try {
+      const storedHistory = global.__PROT10_PERSISTED_DATABASE__;
+      if (storedHistory && storedHistory !== "[]") {
+        setHistory(JSON.parse(storedHistory));
+        setShowOnboarding(false);
+      }
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleNextSlide = () => {
     if (currentSlide < onboardingSlides.length - 1) {
@@ -71,7 +93,7 @@ export default function App() {
     const displayTitle = foodName.trim() || `Product #${history.length + 1}`;
     setHistory([{ id: Date.now().toString(), title: displayTitle, calories, protein, ratio: result.ratio, grade: result.grade, color: result.color }, ...history]);
     setFoodName(''); setCalories(''); setProtein(''); setDvPercent(''); setResult(null);
-    Alert.alert("Success", "Product saved to History Log!");
+    Alert.alert("Success", "Product saved successfully!");
   };
 
   if (isLoading) return <View style={[styles.container, styles.center]}><ActivityIndicator size="large" color="#3b82f6" /></View>;
@@ -101,7 +123,6 @@ export default function App() {
         <ScrollView contentContainerStyle={styles.scrollContainer}>
           <Text style={styles.headerTitle}>Prot10</Text>
           
-          {/* SCREEN 1: CALCULATOR VIEW */}
           {activeTab === 'calculator' && (
             <View>
               <Text style={styles.headerSubtitle}>Protein Integrity Tracker</Text>
@@ -116,7 +137,6 @@ export default function App() {
                 <TextInput style={styles.input} placeholder="0" placeholderTextColor="#6b7280" keyboardType="numeric" value={dvPercent} onChangeText={setDvPercent} />
                 <TouchableOpacity style={styles.button} onPress={evaluateProtein}><Text style={styles.buttonText}>Evaluate Label</Text></TouchableOpacity>
               </View>
-              
               {result && (
                 <View style={[styles.resultCard, { borderColor: result.color }]}>
                   <Text style={[styles.resultGrade, { color: result.color }]}>{result.grade}</Text>
@@ -128,18 +148,16 @@ export default function App() {
             </View>
           )}
 
-          {/* SCREEN 2: HISTORY LOG VIEW */}
           {activeTab === 'history' && (
-            <View style={{ marginTop: 10 }}>
+            <View style={styles.historyContainer}>
               <View style={styles.historyHeader}>
                 <Text style={styles.sectionLabel}>Saved History Log</Text>
                 {history.length > 0 && (
-                  <TouchableOpacity onPress={() => Alert.alert("Clear", "Delete history?", [{ text: "Cancel" }, { text: "Delete", onPress: () => setHistory([]) }])}>
+                  <TouchableOpacity onPress={() => Alert.alert("Clear", "Delete history?", [{ text: "Cancel" }, { text: "Delete", onPress: () => { setHistory([]); global.__PROT10_PERSISTED_DATABASE__ = "[]"; } }])}>
                     <Text style={styles.clearHistoryText}>Clear All</Text>
                   </TouchableOpacity>
                 )}
               </View>
-
               {history.length === 0 ? (
                 <Text style={{ color: '#64748b', textAlign: 'center', marginTop: 40, fontSize: 16 }}>No items saved yet. Use the calculator tab to evaluate food products!</Text>
               ) : (
@@ -150,7 +168,6 @@ export default function App() {
                   </View>
                 ))
               )}
-              
               <TouchableOpacity style={[styles.debugButton, { marginTop: 60 }]} onPress={() => setShowOnboarding(true)}>
                 <Text style={styles.debugButtonText}>🔄 Preview Onboarding Slides Again</Text>
               </TouchableOpacity>
@@ -158,7 +175,6 @@ export default function App() {
           )}
         </ScrollView>
 
-        {/* CUSTOM BOTTOM TAB NAVIGATION MENU BAR */}
         <View style={{ flexDirection: 'row', height: 75, backgroundColor: '#1e293b', borderTopWidth: 1, borderColor: '#334155', justifyContent: 'space-around', alignItems: 'center', paddingBottom: 15 }}>
           <TouchableOpacity onPress={() => setActiveTab('calculator')} style={{ alignItems: 'center', flex: 1, opacity: activeTab === 'calculator' ? 1 : 0.4 }}>
             <Text style={{ fontSize: 22, marginBottom: 2 }}>📊</Text>
@@ -173,4 +189,3 @@ export default function App() {
     </SafeAreaView>
   );
 }
-
