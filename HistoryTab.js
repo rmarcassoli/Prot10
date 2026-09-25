@@ -2,23 +2,18 @@ import React, { useState } from 'react';
 import { Text, View, TouchableOpacity, Alert } from 'react-native';
 import { styles } from './theme';
 
-// PREMIUM VECTOR TRASH CAN ICON DESIGN LAYER (Zero-Dependency Custom Lines)
 const VectorTrashIcon = () => (
   <View style={{ width: 24, height: 24, justifyContent: 'center', alignItems: 'center' }}>
-    {/* Trash Lid Line */}
     <View style={{ width: 18, height: 2, backgroundColor: '#ffffff', borderRadius: 1, marginBottom: 2 }} />
-    {/* Small Lid Handle Accent */}
     <View style={{ position: 'absolute', top: 1, width: 6, height: 2, backgroundColor: '#ffffff', borderRadius: 1 }} />
-    {/* Main Trash Bucket Frame */}
     <View style={{ width: 14, height: 16, borderBottomLeftRadius: 3, borderBottomRightRadius: 3, borderWidth: 2, borderColor: '#ffffff', borderTopWidth: 0, paddingHorizontal: 2, flexDirection: 'row', justifyContent: 'space-around', alignItems: 'stretch', paddingTop: 2, paddingBottom: 1 }}>
-      {/* Inner Trash Can Vertical Detail Lines */}
       <View style={{ width: 2, backgroundColor: '#ffffff', opacity: 0.6, borderRadius: 1 }} />
       <View style={{ width: 2, backgroundColor: '#ffffff', opacity: 0.6, borderRadius: 1 }} />
     </View>
   </View>
 );
 
-export default function HistoryTab({ history, setHistory, setShowOnboarding }) {
+export default function HistoryTab({ history, setHistory, setShowOnboarding, setCurrentSlide }) {
   const [swipedItemId, setSwipedItemId] = useState(null);
   const [touchStartX, setTouchStartX] = useState(0);
 
@@ -55,6 +50,11 @@ export default function HistoryTab({ history, setHistory, setShowOnboarding }) {
         }
       ]
     );
+  };
+
+  const startPreview = () => {
+    setCurrentSlide(0);
+    setShowOnboarding(true);
   };
 
   return (
@@ -113,7 +113,6 @@ export default function HistoryTab({ history, setHistory, setShowOnboarding }) {
                 </View>
               </View>
 
-              {/* REVERSED UNDERLAY WORKSPACE FEATURING THE NEW VECTOR DESIGN ICON */}
               <TouchableOpacity 
                 onPress={() => deleteItem(item.id, item.title)}
                 style={{ width: 80, justifyContent: 'center', alignItems: 'center', zIndex: 1 }}
@@ -125,11 +124,12 @@ export default function HistoryTab({ history, setHistory, setShowOnboarding }) {
         })
       )}
 
-      <TouchableOpacity style={[styles.debugButton, { marginTop: 40 }]} onPress={() => setShowOnboarding(true)}>
+      <TouchableOpacity style={[styles.debugButton, { marginTop: 40 }]} onPress={startPreview}>
         <Text style={styles.debugButtonText}>🔄 Preview Onboarding Slides Again</Text>
       </TouchableOpacity>
     </View>
   );
 }
+
 
 

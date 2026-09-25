@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Text, View, TextInput, TouchableOpacity, ScrollView, SafeAreaView, ActivityIndicator, Alert } from 'react-native';
-
+import { Text, View, TouchableOpacity, ScrollView, SafeAreaView, ActivityIndicator, Alert } from 'react-native';
 import { styles, onboardingSlides } from './theme';
 import CalculatorTab from './CalculatorTab';
 import HistoryTab from './HistoryTab';
@@ -99,7 +98,8 @@ export default function App() {
           {activeTab === 'calculator' ? (
             <CalculatorTab foodName={foodName} setFoodName={setFoodName} calories={calories} setCalories={setCalories} protein={protein} setProtein={setProtein} dvPercent={dvPercent} setDvPercent={setDvPercent} evaluateProtein={evaluateProtein} result={result} logToHistory={logToHistory} />
           ) : (
-            <HistoryTab history={history} setHistory={setHistory} setShowOnboarding={setShowOnboarding} />
+            /* We pass the setCurrentSlide handler down here so the button can reset the index values cleanly */
+            <HistoryTab history={history} setHistory={setHistory} setShowOnboarding={setShowOnboarding} setCurrentSlide={setCurrentSlide} />
           )}
         </ScrollView>
         <View style={{ flexDirection: 'row', height: 75, backgroundColor: '#131c2e', borderTopWidth: 1, borderColor: '#1e293b', justifyContent: 'space-around', alignItems: 'center', paddingBottom: 15 }}>

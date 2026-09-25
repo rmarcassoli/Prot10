@@ -8,9 +8,8 @@
     "expo-camera": "~57.0.5",
     "expo-status-bar": "~57.0.1",
     "react": "19.2.3",
-    "react-native": "0.86.3",
-    "undefined": "react-native-ml-kit/text-recognition"
-  },
+    "react-native": "0.86.3"
+    },
   "scripts": {
     "start": "expo start",
     "android": "expo run:android",
