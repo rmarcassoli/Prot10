@@ -4,17 +4,20 @@ export const onboardingSlides = [
   {
     title: "Welcome to Prot10",
     description: "Food marketing can be misleading. Prot10 helps you cut through the hype and decode the true density and quality of protein on any nutrition label.",
-    icon: "🔍"
+    iconName: 'search',
+    iconType: 'Ionicons'
   },
   {
     title: "The 10% Density Rule",
     description: "True high-protein food should have at least 1 gram of protein for every 10 calories. If an item has 140 calories, it needs 14g of protein to pass our density check.",
-    icon: "⚖️"
+    iconName: 'bar-chart',
+    iconType: 'Ionicons'
   },
   {
     title: "The Quality Check",
     description: "Grams only measure quantity. By entering the % Daily Value (%DV), Prot10 calculates if the source uses complete amino acids (like whey/soy) or cheap fillers (like collagen).",
-    icon: "🧬"
+    iconName: 'fitness',
+    iconType: 'Ionicons'
   }
 ];
 
@@ -65,7 +68,22 @@ export const styles = StyleSheet.create({
 
   // Interactive Onboarding Layout
   onboardingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 36 },
-  iconText: { fontSize: 72, marginBottom: 28 },
+  iconCircle: {
+    width: 120,
+    height: 120,
+    borderRadius: 36,
+    backgroundColor: '#131c2e',
+    borderWidth: 1,
+    borderColor: '#1e293b',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 28,
+    shadowColor: '#2563eb',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.18,
+    shadowRadius: 12,
+    elevation: 5
+  },
   onboardingTitle: { fontSize: 30, fontWeight: '900', color: '#ffffff', textAlign: 'center', marginBottom: 18, letterSpacing: -0.5 },
   onboardingDescription: { fontSize: 16, color: '#94a3b8', textAlign: 'center', lineHeight: 26, marginBottom: 44, fontWeight: '500' },
   progressWrapper: { flexDirection: 'row', marginBottom: 44 },

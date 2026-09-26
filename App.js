@@ -1,34 +1,32 @@
 import React, { useState, useEffect } from 'react';
-import { Text, View, TouchableOpacity, ScrollView, SafeAreaView, ActivityIndicator, Alert } from 'react-native';
+import { Text, View, TouchableOpacity, SafeAreaView, ActivityIndicator, Alert } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { styles, onboardingSlides } from './theme';
 import CalculatorTab from './CalculatorTab';
 import HistoryTab from './HistoryTab';
+
+const OnboardingIcon = ({ name }) => (
+  <Ionicons name={name} size={42} color="#38bdf8" />
+);
 
 if (!global.__PROT10_PERSISTED_DATABASE__) {
   global.__PROT10_PERSISTED_DATABASE__ = "[]";
 }
 
 const CalculatorIcon = ({ active }) => (
-  <View style={{ width: 24, height: 24, justifyContent: 'center', alignItems: 'center', opacity: active ? 1 : 0.4 }}>
-    <View style={{ width: 20, height: 24, borderRadius: 5, borderWidth: 2, borderColor: '#fff', padding: 2, justifyContent: 'space-between' }}>
-      <View style={{ height: 4, backgroundColor: '#fff', borderRadius: 1 }} />
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-        <View style={{ width: 3, height: 3, backgroundColor: '#fff', borderRadius: 0.5 }} /><View style={{ width: 3, height: 3, backgroundColor: '#fff', borderRadius: 0.5 }} /><View style={{ width: 3, height: 3, backgroundColor: '#fff', borderRadius: 0.5 }} />
-      </View>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-        <View style={{ width: 3, height: 3, backgroundColor: '#fff', borderRadius: 0.5 }} /><View style={{ width: 3, height: 3, backgroundColor: '#fff', borderRadius: 0.5 }} /><View style={{ width: 3, height: 3, backgroundColor: '#fff', borderRadius: 0.5 }} />
-      </View>
-    </View>
-  </View>
+  <Ionicons
+    name={active ? 'calculator' : 'calculator-outline'}
+    size={18}
+    color={active ? '#ffffff' : '#94a3b8'}
+  />
 );
 
 const HistoryIcon = ({ active }) => (
-  <View style={{ width: 24, height: 24, justifyContent: 'center', alignItems: 'center', opacity: active ? 1 : 0.4 }}>
-    <View style={{ width: 20, height: 22, borderRadius: 4, borderWidth: 2, borderColor: '#fff', padding: 3, justifyContent: 'space-between' }}>
-      <View style={{ width: 10, height: 2, backgroundColor: '#fff', borderRadius: 1 }} /><View style={{ width: 10, height: 2, backgroundColor: '#fff', borderRadius: 1 }} /><View style={{ width: 6, height: 2, backgroundColor: '#fff', borderRadius: 1 }} />
-    </View>
-    <View style={{ position: 'absolute', right: -1, bottom: -1, width: 8, height: 8, borderRadius: 4, backgroundColor: '#2563eb', borderWidth: 1, borderColor: '#1e293b' }} />
-  </View>
+  <Ionicons
+    name={active ? 'time' : 'time-outline'}
+    size={18}
+    color={active ? '#ffffff' : '#94a3b8'}
+  />
 );
 
 export default function App() {
@@ -41,7 +39,7 @@ export default function App() {
   const [calories, setCalories] = useState('');
   const [protein, setProtein] = useState('');
   const [dvPercent, setDvPercent] = useState('');
-  
+
   const [result, setResult] = useState(null);
   const [history, setHistory] = useState([]);
 
@@ -51,40 +49,143 @@ export default function App() {
   const loadStoredData = () => {
     try {
       const db = global.__PROT10_PERSISTED_DATABASE__;
-      if (db && db !== "[]") { setHistory(JSON.parse(db)); setShowOnboarding(false); }
-    } catch (e) { console.log(e); } finally { setIsLoading(false); }
+      if (db && db !== "[]") {
+        setHistory(JSON.parse(db));
+        setShowOnboarding(false);
+      }
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const evaluateProtein = () => {
-    const calNum = parseFloat(calories); const proNum = parseFloat(protein); const dvNum = parseFloat(dvPercent);
-    if (isNaN(calNum) || isNaN(proNum)) { alert("Please enter at least Calories and Protein grams."); return; }
+    const calNum = parseFloat(calories);
+    const proNum = parseFloat(protein);
+    const dvNum = dvPercent !== '' && dvPercent !== null ? parseFloat(dvPercent) : null;
+
+    if (isNaN(calNum) || isNaN(proNum) || calNum <= 0 || proNum <= 0) {
+      alert("Please enter valid positive numbers for Calories and Protein.");
+      return;
+    }
+
     const passesTenPercentRule = proNum >= (calNum / 10.0);
-    let qualityStatus = !isNaN(dvNum) ? (dvNum >= (proNum * 2.0 * 0.9) ? 'high' : 'low') : 'unknown';
-    let grade = '🔴 Protein Halo Trap'; let color = '#ef4444'; let feedback = 'Too many calories relative to protein.';
+    const ratio = (proNum * 4 / calNum * 100).toFixed(0);
+
+    let qualityStatus = 'NO_DATA';
+    let qualityLabel = 'Unverified Quality';
+
+    if (dvNum !== null && !isNaN(dvNum)) {
+      const requiredDV = proNum * 2.0 * 0.9;
+      if (dvNum >= requiredDV) {
+        qualityStatus = 'PASS';
+        qualityLabel = 'Verified Complete Profile';
+      } else {
+        qualityStatus = 'FAIL';
+        qualityLabel = 'Incomplete / Low Quality';
+      }
+    }
+
+    let grade = 'LOW DENSITY';
+    let color = '#ef4444';
+    let feedback = `Only ${ratio}% of calories come from protein. Requires at least 10%.`;
+
     if (passesTenPercentRule) {
-      if (qualityStatus === 'low') { grade = '🟡 Quantity Over Quality'; color = '#eab308'; feedback = 'Meets density, but uses an incomplete source.'; }
-      else { grade = '🟢 Prot10 Certified'; color = '#22c55e'; feedback = 'Excellent ratio with a complete protein source!'; }
-    } else if (qualityStatus === 'high') { grade = '🟡 Balanced / Low Density'; color = '#eab308'; feedback = 'High quality source material, but calorie-dense.'; }
-    setResult({ grade, color, feedback, ratio: calNum > 0 ? (proNum * 4 / calNum * 100).toFixed(0) : 0 });
+      switch (qualityStatus) {
+        case 'PASS':
+          grade = 'GOLD TIER';
+          color = '#06b6d4';
+          feedback = `${ratio}% protein calories. Excellent ratio with a verified complete protein source!`;
+          break;
+        case 'FAIL':
+          grade = 'SILVER TIER';
+          color = '#eab308';
+          feedback = `${ratio}% protein calories. Meets density requirement, but utilizes a lower quality source.`;
+          break;
+        case 'NO_DATA':
+        default:
+          grade = 'PROT10 PASSED';
+          color = '#22c55e';
+          feedback = `${ratio}% protein calories. Meets density threshold. (%DV unverified).`;
+          break;
+      }
+    }
+
+    setResult({
+      grade,
+      color,
+      feedback,
+      ratio,
+      qualityLabel
+    });
   };
 
   const logToHistory = () => {
     if (!result) return;
-    setHistory([{ id: Date.now().toString(), title: foodName.trim() || `Product #${history.length + 1}`, calories, protein, ratio: result.ratio, grade: result.grade, color: result.color }, ...history]);
-    setFoodName(''); setCalories(''); setProtein(''); setDvPercent(''); setResult(null);
-    Alert.alert("Success", "Product saved successfully!");
+    const nextEntry = {
+      id: Date.now().toString(),
+      title: foodName.trim() || `Product #${history.length + 1}`,
+      calories,
+      protein,
+      ratio: result.ratio,
+      grade: result.grade,
+      color: result.color
+    };
+    setHistory([nextEntry, ...history]);
+    setFoodName('');
+    setCalories('');
+    setProtein('');
+    setDvPercent('');
+    setResult(null);
+    Alert.alert('Success', 'Product saved successfully!');
   };
 
-  if (isLoading) return <View style={[styles.container, styles.center]}><ActivityIndicator size="large" color="#3b82f6" /></View>;
+  if (isLoading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <ActivityIndicator size="large" color="#2563eb" />
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   if (showOnboarding) {
     const slide = onboardingSlides[currentSlide];
+
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.onboardingContainer}>
-          <Text style={styles.iconText}>{slide.icon}</Text><Text style={styles.onboardingTitle}>{slide.title}</Text><Text style={styles.onboardingDescription}>{slide.description}</Text>
-          <View style={styles.progressWrapper}>{onboardingSlides.map((_, idx) => <View key={idx} style={[styles.dot, currentSlide === idx && styles.activeDot]} />)}</View>
-          <TouchableOpacity style={styles.onboardingButton} onPress={() => currentSlide < onboardingSlides.length - 1 ? setCurrentSlide(currentSlide + 1) : setShowOnboarding(false)}><Text style={styles.buttonText}>{currentSlide === onboardingSlides.length - 1 ? "Get Started" : "Next"}</Text></TouchableOpacity>
+          <View style={styles.iconCircle}>
+            <OnboardingIcon name={slide.iconName} />
+          </View>
+          <Text style={styles.onboardingTitle}>{slide.title}</Text>
+          <Text style={styles.onboardingDescription}>{slide.description}</Text>
+
+          <View style={styles.progressWrapper}>
+            {onboardingSlides.map((_, idx) => (
+              <View
+                key={idx}
+                style={[styles.dot, idx === currentSlide && styles.activeDot]}
+              />
+            ))}
+          </View>
+
+          <TouchableOpacity
+            style={styles.onboardingButton}
+            onPress={() => {
+              if (currentSlide < onboardingSlides.length - 1) {
+                setCurrentSlide(currentSlide + 1);
+              } else {
+                setShowOnboarding(false);
+              }
+            }}
+          >
+            <Text style={styles.buttonText}>
+              {currentSlide === onboardingSlides.length - 1 ? 'Get Started' : 'Next'}
+            </Text>
+          </TouchableOpacity>
         </View>
       </SafeAreaView>
     );
@@ -92,20 +193,80 @@ export default function App() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={{ flex: 1 }}>
-        <ScrollView contentContainerStyle={styles.scrollContainer}>
-          <Text style={styles.headerTitle}>Prot10</Text>
-          {activeTab === 'calculator' ? (
-            <CalculatorTab foodName={foodName} setFoodName={setFoodName} calories={calories} setCalories={setCalories} protein={protein} setProtein={setProtein} dvPercent={dvPercent} setDvPercent={setDvPercent} evaluateProtein={evaluateProtein} result={result} logToHistory={logToHistory} />
-          ) : (
-            /* We pass the setCurrentSlide handler down here so the button can reset the index values cleanly */
-            <HistoryTab history={history} setHistory={setHistory} setShowOnboarding={setShowOnboarding} setCurrentSlide={setCurrentSlide} />
-          )}
-        </ScrollView>
-        <View style={{ flexDirection: 'row', height: 75, backgroundColor: '#131c2e', borderTopWidth: 1, borderColor: '#1e293b', justifyContent: 'space-around', alignItems: 'center', paddingBottom: 15 }}>
-          <TouchableOpacity onPress={() => setActiveTab('calculator')} style={{ alignItems: 'center', flex: 1, paddingTop: 10 }}><CalculatorIcon active={activeTab === 'calculator'} /><Text style={{ color: activeTab === 'calculator' ? '#2563eb' : '#64748b', fontSize: 11, fontWeight: '700', marginTop: 5 }}>Calculator</Text></TouchableOpacity>
-          <TouchableOpacity onPress={() => setActiveTab('history')} style={{ alignItems: 'center', flex: 1, paddingTop: 10 }}><HistoryIcon active={activeTab === 'history'} /><Text style={{ color: activeTab === 'history' ? '#2563eb' : '#64748b', fontSize: 11, fontWeight: '700', marginTop: 5 }}>History ({history.length})</Text></TouchableOpacity>
+      <View style={{ flex: 1, paddingHorizontal: 18, paddingTop: 12, paddingBottom: 12 }}>
+        <Text style={styles.headerTitle}>Prot10</Text>
+
+        <View
+          style={{
+            flexDirection: 'row',
+            backgroundColor: '#101827',
+            borderRadius: 18,
+            padding: 6,
+            borderWidth: 1,
+            borderColor: '#1e293b',
+            marginBottom: 16,
+            overflow: 'hidden'
+          }}
+        >
+          <TouchableOpacity
+            onPress={() => setActiveTab('calculator')}
+            style={{
+              flex: 1,
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center',
+              paddingVertical: 12,
+              borderRadius: 12,
+              backgroundColor: activeTab === 'calculator' ? '#2563eb' : 'transparent'
+            }}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+              <CalculatorIcon active={activeTab === 'calculator'} />
+              <Text style={{ color: '#ffffff', fontWeight: '700', marginLeft: 8 }}>Calculator</Text>
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => setActiveTab('history')}
+            style={{
+              flex: 1,
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center',
+              paddingVertical: 12,
+              borderRadius: 12,
+              backgroundColor: activeTab === 'history' ? '#2563eb' : 'transparent'
+            }}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+              <HistoryIcon active={activeTab === 'history'} />
+              <Text style={{ color: '#ffffff', fontWeight: '700', marginLeft: 8 }}>History ({history.length})</Text>
+            </View>
+          </TouchableOpacity>
         </View>
+
+        {activeTab === 'calculator' ? (
+          <CalculatorTab
+            foodName={foodName}
+            setFoodName={setFoodName}
+            calories={calories}
+            setCalories={setCalories}
+            protein={protein}
+            setProtein={setProtein}
+            dvPercent={dvPercent}
+            setDvPercent={setDvPercent}
+            evaluateProtein={evaluateProtein}
+            result={result}
+            logToHistory={logToHistory}
+          />
+        ) : (
+          <HistoryTab
+            history={history}
+            setHistory={setHistory}
+            setShowOnboarding={setShowOnboarding}
+            setCurrentSlide={setCurrentSlide}
+          />
+        )}
       </View>
     </SafeAreaView>
   );
