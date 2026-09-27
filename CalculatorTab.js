@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { Text, View, TextInput, TouchableOpacity, KeyboardAvoidingView, Keyboard, Platform, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { styles } from './theme';
 
 export default function CalculatorTab({
@@ -16,7 +17,8 @@ export default function CalculatorTab({
   const dvRef = useRef(null);
   const [isEvaluationUnlocked, setIsEvaluationUnlocked] = useState(false);
 
-  const focusNext = (nextRef) => {
+  const focusNext = async (nextRef) => {
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     if (nextRef && nextRef.current) {
       nextRef.current.focus();
     } else {
@@ -29,7 +31,8 @@ export default function CalculatorTab({
     setIsEvaluationUnlocked(false);
   };
 
-  const finishEntry = () => {
+  const finishEntry = async () => {
+    await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     Keyboard.dismiss();
     setIsEvaluationUnlocked(true);
   };
@@ -44,7 +47,7 @@ export default function CalculatorTab({
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <TextInput
           ref={inputRef}
-          style={[styles.input, { flex: 1, marginBottom: 0 }]}
+          style={[styles.input, { flex: 1, marginBottom: 0 }]} 
           placeholder={placeholder}
           placeholderTextColor="#475569"
           keyboardType={keyboardType}
@@ -54,24 +57,31 @@ export default function CalculatorTab({
           blurOnSubmit={false}
           submitBehavior="blurAndSubmit"
           onSubmitEditing={Keyboard.dismiss}
+          selectionColor="#7dd3fc"
         />
 
         <TouchableOpacity
           accessibilityRole="button"
           onPress={isLast ? finishEntry : () => focusNext(nextRef)}
+          activeOpacity={0.9}
           style={{
             width: 42,
             height: 42,
             marginLeft: 10,
             borderRadius: 12,
-            backgroundColor: '#0b1120',
+            backgroundColor: '#0a1220',
             borderWidth: 1,
-            borderColor: '#1e293b',
+            borderColor: '#2b3d5d',
             alignItems: 'center',
-            justifyContent: 'center'
+            justifyContent: 'center',
+            shadowColor: '#38bdf8',
+            shadowOffset: { width: 0, height: 3 },
+            shadowOpacity: 0.10,
+            shadowRadius: 6,
+            elevation: 2
           }}
         >
-          <Ionicons name={isLast ? 'checkmark' : 'chevron-forward'} size={18} color="#38bdf8" />
+          <Ionicons name={isLast ? 'checkmark' : 'chevron-forward'} size={18} color="#7dd3fc" />
         </TouchableOpacity>
       </View>
     </View>
@@ -91,7 +101,7 @@ export default function CalculatorTab({
         bounces={false}
       >
         <View style={{ flex: 1 }}>
-          <Text style={styles.headerSubtitle}>Protein Integrity Tracker</Text>
+          <Text style={styles.headerSubtitle}>Protein Quality Checker</Text>
 
           <View style={styles.card}>
             {renderField({
@@ -142,26 +152,20 @@ export default function CalculatorTab({
 
             <TouchableOpacity
               disabled={!isEvaluationUnlocked}
-              onPress={evaluateProtein}
-              style={[styles.button, { opacity: isEvaluationUnlocked ? 1 : 0.45 }]}
+              onPress={async () => {
+                if (isEvaluationUnlocked) {
+                  await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  evaluateProtein();
+                }
+              }}
+              style={[styles.button, { opacity: isEvaluationUnlocked ? 1 : 0.45, flexDirection: 'row', justifyContent: 'center', gap: 8 }]}
             >
+              <Ionicons name="sparkles" size={16} color={isEvaluationUnlocked ? '#ffffff' : '#94a3b8'} />
               <Text style={[styles.buttonText, { color: isEvaluationUnlocked ? '#ffffff' : '#94a3b8' }]}>Evaluate Label</Text>
             </TouchableOpacity>
           </View>
 
-          {result && (
-            <View style={[styles.resultCard, { borderColor: result.color }]}>
-              <Text style={[styles.resultGrade, { color: result.color }]}>{result.grade}</Text>
-              <Text style={styles.resultText}>Calories from Protein: {result.ratio}%</Text>
-              <Text style={styles.resultFeedback}>{result.feedback}</Text>
-              <TouchableOpacity style={styles.logButton} onPress={logToHistory}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-                  <Ionicons name="save-outline" size={16} color="#ffffff" style={{ marginRight: 8 }} />
-                  <Text style={styles.logButtonText}>Save Item to History Log</Text>
-                </View>
-              </TouchableOpacity>
-            </View>
-          )}
+          {/* Result modal handled in App.js */}
         </View>
       </ScrollView>
     </KeyboardAvoidingView>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Text, View, TouchableOpacity, Alert } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import { styles } from './theme';
 
 const VectorTrashIcon = () => (
@@ -26,33 +27,38 @@ export default function HistoryTab({ history, setHistory, setShowOnboarding, set
     const swipeDistance = touchStartX - touchEndX;
 
     if (swipeDistance > 40) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       setSwipedItemId(itemId);
     } else if (swipeDistance < -40) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       setSwipedItemId(null);
     }
   };
 
   const deleteItem = (id, title) => {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
     Alert.alert(
       "Delete Item",
       `Are you sure you want to remove "${title}" from your history?`,
       [
         { text: "Cancel", style: "cancel", onPress: () => setSwipedItemId(null) },
-        { 
-          text: "Delete", 
-          style: "destructive", 
+        {
+          text: "Delete",
+          style: "destructive",
           onPress: () => {
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             const updatedHistory = history.filter(item => item.id !== id);
             setHistory(updatedHistory);
             global.__PROT10_PERSISTED_DATABASE__ = JSON.stringify(updatedHistory);
             setSwipedItemId(null);
-          } 
+          }
         }
       ]
     );
   };
 
   const startPreview = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setCurrentSlide(0);
     setShowOnboarding(true);
   };
@@ -62,16 +68,18 @@ export default function HistoryTab({ history, setHistory, setShowOnboarding, set
       <View style={styles.historyHeader}>
         <Text style={styles.sectionLabel}>Saved History Log</Text>
         {history.length > 0 && (
-          <TouchableOpacity onPress={() => Alert.alert("Clear All", "Delete entire history?", [{ text: "Cancel" }, { text: "Delete All", onPress: () => { setHistory([]); global.__PROT10_PERSISTED_DATABASE__ = "[]"; } }])}>
+          <TouchableOpacity onPress={() => Alert.alert("Clear All", "Delete entire history?", [{ text: "Cancel" }, { text: "Delete All", onPress: () => { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); setHistory([]); global.__PROT10_PERSISTED_DATABASE__ = "[]"; } }])}>
             <Text style={styles.clearHistoryText}>Clear All</Text>
           </TouchableOpacity>
         )}
       </View>
 
       {history.length === 0 ? (
-        <Text style={{ color: '#475569', textAlign: 'center', marginTop: 40, fontSize: 16, fontWeight: '600' }}>
-          No items saved yet. Use the calculator tab to evaluate food products!
-        </Text>
+        <View style={{ backgroundColor: '#111b2d', borderRadius: 18, borderWidth: 1, borderColor: '#22314d', padding: 20, marginTop: 12 }}>
+          <Text style={{ color: '#cbd5e1', textAlign: 'center', fontSize: 16, fontWeight: '600', lineHeight: 24 }}>
+            No items saved yet. Use the calculator tab to evaluate food products.
+          </Text>
+        </View>
       ) : (
         history.map((item) => {
           const isOpened = swipedItemId === item.id;
@@ -79,7 +87,7 @@ export default function HistoryTab({ history, setHistory, setShowOnboarding, set
           return (
             <View 
               key={item.id} 
-              style={{ marginBottom: 12, height: 80, backgroundColor: '#f43f5e', borderRadius: 14, overflow: 'hidden', flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'stretch', borderWidth: 1, borderColor: '#1e293b' }}
+              style={{ marginBottom: 12, height: 82, backgroundColor: '#f43f5e', borderRadius: 16, overflow: 'hidden', flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'stretch', borderWidth: 1, borderColor: '#2b3a4d', shadowColor: '#020817', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.18, shadowRadius: 8, elevation: 3 }}
               onStartShouldSetResponder={() => true}
               onResponderGrant={handleTouchStart}
               onResponderRelease={(e) => handleTouchEnd(e, item.id)}
@@ -113,7 +121,7 @@ export default function HistoryTab({ history, setHistory, setShowOnboarding, set
                 </View>
               </View>
 
-              <TouchableOpacity 
+              <TouchableOpacity
                 onPress={() => deleteItem(item.id, item.title)}
                 style={{ width: 80, justifyContent: 'center', alignItems: 'center', zIndex: 1 }}
               >

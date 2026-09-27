@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Text, View, TouchableOpacity, SafeAreaView, ActivityIndicator, Alert } from 'react-native';
+import { Text, View, TouchableOpacity, SafeAreaView, ActivityIndicator, Alert, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { styles, onboardingSlides } from './theme';
 import CalculatorTab from './CalculatorTab';
 import HistoryTab from './HistoryTab';
@@ -141,6 +142,10 @@ export default function App() {
     Alert.alert('Success', 'Product saved successfully!');
   };
 
+  const closeResultModal = () => {
+    setResult(null);
+  };
+
   if (isLoading) {
     return (
       <SafeAreaView style={styles.container}>
@@ -174,7 +179,8 @@ export default function App() {
 
           <TouchableOpacity
             style={styles.onboardingButton}
-            onPress={() => {
+            onPress={async () => {
+              await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               if (currentSlide < onboardingSlides.length - 1) {
                 setCurrentSlide(currentSlide + 1);
               } else {
@@ -194,18 +200,86 @@ export default function App() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={{ flex: 1, paddingHorizontal: 18, paddingTop: 12, paddingBottom: 12 }}>
-        <Text style={styles.headerTitle}>Prot10</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+          <View style={{ flex: 1, alignItems: 'center' }}>
+            <Text style={styles.headerTitle}>Prot10</Text>
+          </View>
+
+          <TouchableOpacity
+            accessibilityRole="button"
+            onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
+            style={{
+              width: 58,
+              height: 58,
+              borderRadius: 29,
+              backgroundColor: '#0d1d2d',
+              borderWidth: 1,
+              borderColor: '#2a4668',
+              justifyContent: 'center',
+              alignItems: 'center',
+              shadowColor: '#38bdf8',
+              shadowOffset: { width: 0, height: 6 },
+              shadowOpacity: 0.12,
+              shadowRadius: 10,
+              elevation: 4
+            }}
+          >
+            <Ionicons name="bar-chart-outline" size={26} color="#7dd3fc" />
+          </TouchableOpacity>
+        </View>
+
+        {result && (
+          <Modal
+            transparent
+            visible={Boolean(result)}
+            animationType="slide"
+            onRequestClose={closeResultModal}
+          >
+            <View style={{ flex: 1, backgroundColor: 'rgba(2, 6, 23, 0.72)', justifyContent: 'center', alignItems: 'center', padding: 24 }}>
+              <View style={{ width: '100%', maxWidth: 400, backgroundColor: '#131c2e', borderRadius: 24, borderWidth: 1, borderColor: '#1e293b', padding: 28, shadowColor: '#000', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.35, shadowRadius: 20, elevation: 10 }}>
+                <Text style={[styles.resultGrade, { color: result.color, textAlign: 'center' }]}>{result.grade}</Text>
+                <Text style={[styles.resultText, { textAlign: 'center', marginBottom: 12 }]}>Calories from Protein: {result.ratio}%</Text>
+                <Text style={[styles.resultFeedback, { marginBottom: 18 }]}>{result.feedback}</Text>
+                <Text style={{ color: '#7dd3fc', fontSize: 13, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.8, textAlign: 'center', marginBottom: 20 }}>{result.qualityLabel}</Text>
+
+                <View style={{ flexDirection: 'row', gap: 12 }}>
+                  <TouchableOpacity
+                    onPress={closeResultModal}
+                    style={{ flex: 1, backgroundColor: '#1e293b', borderRadius: 12, paddingVertical: 14, alignItems: 'center', borderWidth: 1, borderColor: '#334155' }}
+                  >
+                    <Text style={{ color: '#e2e8f0', fontWeight: '800' }}>Close</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    onPress={() => {
+                      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                      logToHistory();
+                    }}
+                    style={{ flex: 1, backgroundColor: '#059669', borderRadius: 12, paddingVertical: 14, alignItems: 'center', shadowColor: '#059669', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.25, shadowRadius: 6 }}
+                  >
+                    <Text style={{ color: '#ffffff', fontWeight: '800' }}>Save</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </Modal>
+        )}
 
         <View
           style={{
             flexDirection: 'row',
-            backgroundColor: '#101827',
+            backgroundColor: '#07121d',
             borderRadius: 18,
             padding: 6,
             borderWidth: 1,
-            borderColor: '#1e293b',
+            borderColor: '#1d2f47',
             marginBottom: 16,
-            overflow: 'hidden'
+            overflow: 'hidden',
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 8 },
+            shadowOpacity: 0.25,
+            shadowRadius: 12,
+            elevation: 5
           }}
         >
           <TouchableOpacity
@@ -217,7 +291,9 @@ export default function App() {
               justifyContent: 'center',
               paddingVertical: 12,
               borderRadius: 12,
-              backgroundColor: activeTab === 'calculator' ? '#2563eb' : 'transparent'
+              backgroundColor: activeTab === 'calculator' ? '#0f2138' : 'transparent',
+              borderWidth: activeTab === 'calculator' ? 1 : 0,
+              borderColor: '#67e8f9'
             }}
           >
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
@@ -235,7 +311,9 @@ export default function App() {
               justifyContent: 'center',
               paddingVertical: 12,
               borderRadius: 12,
-              backgroundColor: activeTab === 'history' ? '#2563eb' : 'transparent'
+              backgroundColor: activeTab === 'history' ? '#0f2138' : 'transparent',
+              borderWidth: activeTab === 'history' ? 1 : 0,
+              borderColor: '#67e8f9'
             }}
           >
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
