@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Text, View, TouchableOpacity, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Haptics from 'expo-haptics';
 import { styles } from './theme';
 
@@ -14,7 +15,7 @@ const VectorTrashIcon = () => (
   </View>
 );
 
-export default function HistoryTab({ history, setHistory, setShowOnboarding, setCurrentSlide }) {
+export default function HistoryTab({ history, setHistory, setShowOnboarding, setCurrentSlide, setSkipOnboarding }) {
   const [swipedItemId, setSwipedItemId] = useState(null);
   const [touchStartX, setTouchStartX] = useState(0);
 
@@ -60,7 +61,20 @@ export default function HistoryTab({ history, setHistory, setShowOnboarding, set
   const startPreview = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setCurrentSlide(0);
+    setSkipOnboarding(false);
     setShowOnboarding(true);
+  };
+
+  const resetOnboardingPreference = async () => {
+    try {
+      await AsyncStorage.removeItem('prot10_skip_onboarding');
+      setSkipOnboarding(false);
+      setCurrentSlide(0);
+      setShowOnboarding(true);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } catch (error) {
+      console.log('Reset onboarding failed:', error);
+    }
   };
 
   return (
@@ -132,9 +146,25 @@ export default function HistoryTab({ history, setHistory, setShowOnboarding, set
         })
       )}
 
-      <TouchableOpacity style={[styles.debugButton, { marginTop: 40 }]} onPress={startPreview}>
-        <Text style={styles.debugButtonText}>🔄 Preview Onboarding Slides Again</Text>
-      </TouchableOpacity>
+      <View style={{ marginTop: 40, gap: 12 }}>
+        <TouchableOpacity style={[styles.debugButton, { marginTop: 0 }]} onPress={startPreview}>
+          <Text style={styles.debugButtonText}>🔄 Preview Onboarding Slides Again</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={resetOnboardingPreference}
+          style={{
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: '#1f2f46',
+            backgroundColor: '#0d1827',
+            paddingVertical: 12,
+            alignItems: 'center'
+          }}
+        >
+          <Text style={{ color: '#dfeafc', fontWeight: '700' }}>Reset onboarding reminder</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }

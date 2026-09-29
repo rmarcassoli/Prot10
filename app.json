@@ -6,9 +6,9 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
-      "image": "./assets/icon.png",
+      "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#EAF6FF"
+      "backgroundColor": "#F3F7FA"
     },
     "userInterfaceStyle": "light",
     "ios": {
@@ -16,8 +16,8 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#EAF6FF",
-        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#050b16",
+        "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
@@ -25,6 +25,11 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "958e82c8-ffc5-4b9c-8bf8-17af19eabcd1"
+      }
     }
   }
 }

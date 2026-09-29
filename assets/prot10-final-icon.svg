@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="1024"
+   height="1024"
+   viewBox="0 0 1024 1024"
+   fill="none"
+   version="1.1"
+   id="svg3"
+   sodipodi:docname="prot10-final-icon.svg"
+   inkscape:export-filename="android-icon-background.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
+   inkscape:version="1.4.4 (dcaf3e7, 2026-05-05)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs3" />
+  <sodipodi:namedview
+     id="namedview3"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="0.78808594"
+     inkscape:cx="512.63445"
+     inkscape:cy="511.36555"
+     inkscape:window-width="933"
+     inkscape:window-height="1032"
+     inkscape:window-x="20"
+     inkscape:window-y="0"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg3" />
+  <rect
+     width="1024"
+     height="1024"
+     rx="180"
+     fill="#F3F7FA"
+     id="rect1" />
+  <circle
+     cx="512"
+     cy="512"
+     r="325"
+     fill="#0F1F2F"
+     stroke="#0F1F2F"
+     stroke-width="48"
+     id="circle1" />
+  <circle
+     cx="512"
+     cy="512"
+     r="235"
+     fill="#F2F7FA"
+     stroke="#7EC7EA"
+     stroke-width="36"
+     id="circle2" />
+  <circle
+     cx="512"
+     cy="512"
+     r="188"
+     fill="#F2F7FA"
+     id="circle3" />
+  <path
+     d="M388 510L474 596L648 410"
+     stroke="#5CC76F"
+     stroke-width="44"
+     stroke-linecap="round"
+     stroke-linejoin="round"
+     id="path3" />
+</svg>
